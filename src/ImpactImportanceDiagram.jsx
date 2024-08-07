@@ -296,7 +296,7 @@ const ImpactImportanceDiagram = () => {
                       backgroundColor: 'green', 
                       color: 'white', 
                       '&:hover': {
-                        backgroundColor: 'darkblue'  // שינוי הצבע לרחיפה
+                        backgroundColor: 'darkblue'  // שינוי הצבעים לרחיפה
                       },
                       ml: 1 
                     }}
