@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
-import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button } from '@mui/material';
+import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
@@ -56,6 +56,7 @@ const FilterPaper = styled(Paper)(({ theme }) => ({
 const ImpactImportanceDiagram = () => {
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef(null);
+  
 
   useEffect(() => {
     const updateSize = () => {
@@ -88,6 +89,7 @@ const ImpactImportanceDiagram = () => {
 
   const [data, setData] = useState(initialData);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [zoomedQuadrant, setZoomedQuadrant] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
   const [highlightState, setHighlightState] = useState(0); // 0: none, 1: extreme, 2: center, 3: both
@@ -144,12 +146,21 @@ const ImpactImportanceDiagram = () => {
     setHighlightSpecialState((prevState) => (prevState === state ? 0 : state));
   };
 
+  const handleItemClick = (item) => {
+    setSelectedItem(item);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={rtlTheme}>
         <CssBaseline />
         <Container maxWidth={false} style={{ height: '100vh', padding: '16px' }}>
-          <Typography variant="h3" gutterBottom align="center" color="#F9C307">
+          <Typography variant="h3" gutterBottom align="center" color="0">
             Strategic Focus & Insights Platform
           </Typography>
 
@@ -237,240 +248,275 @@ const ImpactImportanceDiagram = () => {
                   <text x="5" y="25" fontSize="25" fontWeight="bold" fill="#333">0</text>
 
                   <g onClick={() => handleQuadrantClick('Strengths')}>
-                    <rect x="620" y="-445" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
-                    <text x="710" y="-425" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">חוזקות-S</text>
+                    <rect x="0" y="-450" width="800" height="450" fill="transparent" />
+                    <rect x="620" y="-448" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
+                    <text x="710" y="-428" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">חוזקות-S</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Weaknesses')}>
-                    <rect x="-800" y="-445" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
-                    <text x="-710" y="-425" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">חולשות-W</text>
+                    <rect x="-800" y="-450" width="800" height="450" fill="transparent" />
+                    <rect x="-800" y="-448" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
+                    <text x="-710" y="-428" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">חולשות-W</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Opportunities')}>
-                    <rect x="620" y="400" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
-                    <text x="710" y="420" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">הזדמנויות-O</text>
+                    <rect x="0" y="0" width="800" height="450" fill="transparent" />
+                    <rect x="620" y="408" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
+                    <text x="710" y="428" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">הזדמנויות-O</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Threats')}>
-                    <rect x="-800" y="400" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
-                    <text x="-710" y="420" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">איומים-T</text>
+                    <rect x="-800" y="0" width="800" height="450" fill="transparent" />
+                    <rect x="-800" y="408" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
+                    <text x="-710" y="428" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">איומים-T</text>
                   </g>
-                  {filteredData.map((item) => {
-                    const circleSize = 2 + item.z * 5;
-                    return (
-                      <g key={item.id} onClick={() => setSelectedItem(item)} style={{ cursor: 'pointer' }}>
-                        <circle 
-                          cx={(item.x * 80)} 
-                          cy={(item.y * -45)} 
-                          r={circleSize}
-                          fill={colors[item.department]}
-                        />
-                        <text
-                          x={(item.x * 80)}
-                          y={(item.y * -45) + circleSize + 15}
-                          textAnchor="middle"
-                          fill="black"
-                          fontSize="12"
-                          fontWeight="bold"
-                        >
-                          {item.id}
-                        </text>
-                        <text
-                          x={(item.x * 80)}
-                          y={(item.y * -45) + circleSize + 30}
-                          textAnchor="middle"
-                          fill="black"
-                          fontSize="16"
-                        >
-                          {item.description}
-                        </text>
-                      </g>
-                    );
-                  })}
+{filteredData.map((item) => {
+  const circleSize = 1 + item.z * 3;
+  return (
+    <g key={item.id} onClick={() => handleItemClick(item)} style={{ cursor: 'pointer' }}>
+      <circle 
+        cx={(item.x * 80)} 
+        cy={(item.y * -45)} 
+        r={circleSize}
+        fill={colors[item.department]}
+      />
+      <text
+        x={(item.x * 80)}
+        y={(item.y * -45) + circleSize + 15}
+        textAnchor="middle"
+        fill="black"
+        fontSize="12"
+        fontWeight="bold"
+      >
+        {item.id}
+      </text>
+      <text
+        x={(item.x * 80)}
+        y={(item.y * -45) + circleSize + 30}
+        textAnchor="middle"
+        fill="black"
+        fontSize="16"
+      >
+        {item.description}
+      </text>
+    </g>
+  );
+})}
                 </svg>
-              {zoomedQuadrant && (
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  onClick={() => setZoomedQuadrant(null)}
-                  sx={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1 }}
-                >
-                  חזרה לתצוגה מלאה
-                </Button>
-              )}
+                {zoomedQuadrant && (
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={() => setZoomedQuadrant(null)}
+                    sx={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1 }}
+                  >
+                    חזרה לתצוגה מלאה
+                  </Button>
+                )}
               </StyledPaper>
-
-              {selectedItem && (
-                <StyledPaper sx={{ mt: 2 }}>
-                  <Typography variant="h6" gutterBottom textAlign="center">
-                    {selectedItem.description}
-                  </Typography>
-                </StyledPaper>
-              )}
             </Grid>
-<Grid item xs={12} md={3} style={{ height: '100%' }}>
-  <FilterPaper>
-    <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
-    <Grid container spacing={1} sx={{ mb: 2 }}>
-      <Grid item xs={6}>
-        <Button 
-          fullWidth
-          variant="contained" 
-          onClick={() => handleSpecialHighlightClick(1)}
-          sx={{ 
-            backgroundColor: 'green', 
-            color: 'white', 
-            '&:hover': {
-              backgroundColor: 'darkgreen'
-            }
-          }}
-        >
-          מנועי צמיחה
-        </Button>
-      </Grid>
-      <Grid item xs={6}>
-        <Button 
-          fullWidth
-          variant="contained" 
-          onClick={() => handleSpecialHighlightClick(2)}
-          sx={{ 
-            backgroundColor: 'red', 
-            color: 'white', 
-            '&:hover': {
-              backgroundColor: 'darkred'
-            }
-          }}
-        >
-          מעכבי צמיחה
-        </Button>
-      </Grid>
-      <Grid item xs={6}>
-        <Button 
-          fullWidth
-          variant="contained" 
-          onClick={() => handleSpecialHighlightClick(3)}
-          sx={{ 
-            backgroundColor: 'mediumpurple', 
-            color: 'white', 
-            '&:hover': {
-              backgroundColor: 'rebeccapurple'
-            }
-          }}
-        >
-          סביבה חיצונית
-        </Button>
-      </Grid>
-      <Grid item xs={6}>
-        <Button 
-          fullWidth
-          variant="contained" 
-          onClick={() => handleSpecialHighlightClick(4)}
-          sx={{ 
-            backgroundColor: 'purple', 
-            color: 'white', 
-            '&:hover': {
-              backgroundColor: 'indigo'
-            }
-          }}
-        >
-          סביבה פנימית
-        </Button>
-      </Grid>
-      <Grid item xs={6}>
-        <Button 
-          fullWidth
-          variant="contained"
-          color="error"
-          onClick={resetAll}
-        >
-          איפוס
-        </Button>
-      </Grid>
-      <Grid item xs={6}>
-        <Button 
-          fullWidth
-          variant="contained" 
-          onClick={handleHighlightClick}
-          sx={{ 
-            backgroundColor: 'mediumseagreen', 
-            color: 'white', 
-            '&:hover': {
-              backgroundColor: 'seagreen'
-            }
-          }}
-        >
-          אזורי השפעה
-        </Button>
-      </Grid>
-    </Grid>
-    <Typography align="left" gutterBottom >השפעה: {filters.impact}</Typography>
-    <Slider
-      value={filters.impact}
-      onChange={(_, value) => handleFilterChange('impact', value)}
-      min={0}
-      max={10}
-      step={1}
-      marks
-      valueLabelDisplay="auto"
-    />
-    <Typography align="left" gutterBottom>חשיבות: {filters.importance}</Typography>
-    <Slider
-      value={filters.importance}
-      onChange={(_, value) => handleFilterChange('importance', value)}
-      min={0}
-      max={10}
-      step={1}
-      marks
-      valueLabelDisplay="auto"
-    />
-    <Typography align="left" gutterBottom>מורכבות: {filters.complexity}</Typography>
-    <Slider
-      value={filters.complexity}
-      onChange={(_, value) => handleFilterChange('complexity', value)}
-      min={0}
-      max={10}
-      step={1}
-      marks
-      valueLabelDisplay="auto"
-    />
-    <Box sx={{ 
-      display: 'flex', 
-      flexWrap: 'wrap', 
-      justifyContent: 'flex-end',
-      gap: 1  // מרווח בין האלמנטים
-    }}>
-      {Object.keys(colors).map(dept => (
-        <FormControlLabel
-          key={dept}
-          control={
-            <Checkbox
-              checked={filters.department.includes(dept)}
-              onChange={() => {
-                if (filters.department.includes(dept)) {
-                  handleFilterChange('department', filters.department.filter(d => d !== dept));
-                } else {
-                  handleFilterChange('department', [...filters.department, dept]);
-                }
-              }}
-              style={{ color: colors[dept] }}
-            />
-          }
-          label={dept}
-          labelPlacement="start"
+            <Grid item xs={12} md={3} style={{ height: '100%' }}>
+              <FilterPaper>
+                <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
+                <Grid container spacing={1} sx={{ mb: 2 }}>
+                  <Grid item xs={6}>
+                    <Button 
+                      fullWidth
+                      variant="contained" 
+                      onClick={() => handleSpecialHighlightClick(2)}
+                      sx={{ 
+                        backgroundColor: 'red', 
+                        color: 'white', 
+                        '&:hover': {
+                          backgroundColor: 'darkred'
+                        }
+                      }}
+                    >
+                      מעכבי צמיחה
+                    </Button>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Button 
+                      fullWidth
+                      variant="contained" 
+                      onClick={() => handleSpecialHighlightClick(1)}
+                      sx={{ 
+                        backgroundColor: 'green', 
+                        color: 'white', 
+                        '&:hover': {
+                          backgroundColor: 'darkgreen'
+                        }
+                      }}
+                    >
+                      מנועי צמיחה
+                    </Button>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Button 
+                      fullWidth
+                      variant="contained" 
+                      onClick={() => handleSpecialHighlightClick(3)}
+                      sx={{ 
+                        backgroundColor: 'mediumpurple', 
+                        color: 'white', 
+                        '&:hover': {
+                          backgroundColor: 'rebeccapurple'
+                        }
+                      }}
+                    >
+                      סביבה חיצונית
+                    </Button>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Button 
+                      fullWidth
+                      variant="contained" 
+                      onClick={() => handleSpecialHighlightClick(4)}
+                      sx={{ 
+                        backgroundColor: 'purple', 
+                        color: 'white', 
+                        '&:hover': {
+                          backgroundColor: 'indigo'
+                        }
+                      }}
+                    >
+                      סביבה פנימית
+                    </Button>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Button 
+                      fullWidth
+                      variant="contained"
+                      color="error"
+                      onClick={resetAll}
+                    >
+                      איפוס
+                    </Button>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Button 
+                      fullWidth
+                      variant="contained" 
+                      onClick={handleHighlightClick}
+                      sx={{ 
+                        backgroundColor: 'mediumseagreen', 
+                        color: 'white', 
+                        '&:hover': {
+                          backgroundColor: 'seagreen'
+                        }
+                      }}
+                    >
+                      אזורי השפעה
+                    </Button>
+                  </Grid>
+                </Grid>
+                <Typography align="left" gutterBottom>השפעה: {filters.impact}</Typography>
+                <Slider
+                  value={filters.impact}
+                  onChange={(_, value) => handleFilterChange('impact', value)}
+                  min={0}
+                  max={10}
+                  step={1}
+                  marks
+                  valueLabelDisplay="auto"
+                />
+                <Typography align="left" gutterBottom>חשיבות: {filters.importance}</Typography>
+                <Slider
+                  value={filters.importance}
+                  onChange={(_, value) => handleFilterChange('importance', value)}
+                  min={0}
+                  max={10}
+                  step={1}
+                  marks
+                  valueLabelDisplay="auto"
+                />
+                <Typography align="left" gutterBottom>מורכבות: {filters.complexity}</Typography>
+                <Slider
+                  value={filters.complexity}
+                  onChange={(_, value) => handleFilterChange('complexity', value)}
+                  min={0}
+                  max={10}
+                  step={1}
+                  marks
+                  valueLabelDisplay="auto"
+                />
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  justifyContent: 'flex-end',
+                  gap: 1
+                }}>
+                  {Object.keys(colors).map(dept => (
+                    <FormControlLabel
+                      key={dept}
+                      control={
+                        <Checkbox
+                          checked={filters.department.includes(dept)}
+                          onChange={() => {
+                            if (filters.department.includes(dept)) {
+                              handleFilterChange('department', filters.department.filter(d => d !== dept));
+                            } else {
+                              handleFilterChange('department', [...filters.department, dept]);
+                            }
+                          }}
+                          style={{ color: colors[dept] }}
+                        />
+                      }
+                      label={dept}
+                      labelPlacement="start"
+                      sx={{
+                        margin: 0,
+                        '& .MuiFormControlLabel-label': {
+                          marginLeft: 1,
+                          marginRight: 1,
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+              </FilterPaper>
+            </Grid>
+          </Grid>
+          <Link 
+            to="/upload" 
+            style={{ 
+              textDecoration: 'none', 
+              fontSize: '5px', 
+              color: 'yellow', 
+              marginLeft: '10px' 
+            }}
+          >
+            העלאת קובץ
+          </Link>
+        </Container>
+
+        <Dialog 
+          open={isDialogOpen} 
+          onClose={handleCloseDialog} 
+          dir="rtl"
           sx={{
-            margin: 0,
-            '& .MuiFormControlLabel-label': {
-              marginLeft: 1,
-              marginRight: 1,
+            '& .MuiDialog-paper': {
+              maxWidth: '80%',
+              maxHeight: '80%',
             },
           }}
-        />
-      ))}
-    </Box>
-    </FilterPaper>
-</Grid>
-</Grid>
-</Container>
-</ThemeProvider>
-</CacheProvider>
-);
+        >
+          <DialogTitle>תוכן</DialogTitle>
+          <DialogContent>
+            {selectedItem && (
+              <>
+                <Typography variant="h6">{selectedItem.description}</Typography>
+                <Typography><strong>מחלקה:</strong> {selectedItem.department}</Typography>
+                <Typography><strong>קטגוריה:</strong> {selectedItem.category}</Typography>
+              </>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="primary">
+              סגור
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </ThemeProvider>
+    </CacheProvider>
+  );
 };
 
 export default ImpactImportanceDiagram;
