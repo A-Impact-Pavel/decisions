@@ -16,7 +16,7 @@ const cacheRtl = createCache({
 const rtlTheme = createTheme({
   direction: 'rtl',
   typography: {
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: 'Segoe UI',
   },
 });
 
@@ -45,9 +45,6 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
 }));
-
-
-
 
 const ImpactImportanceDiagram = () => {
   const initialFilters = {
@@ -120,10 +117,15 @@ const ImpactImportanceDiagram = () => {
       <ThemeProvider theme={rtlTheme}>
         <CssBaseline />
         <Container maxWidth="lg">
-          <Typography variant="h3" gutterBottom align="center" color="#F9C307">
-            Strategic Focus & Insights Platform
-          </Typography>
-
+          <Box display="flex" justifyContent="center" alignItems="center" width="100%" mx="auto">
+            <Typography 
+              variant="h3" 
+              gutterBottom 
+              color="#F9C307"
+            >
+              Strategic Focus & Insights Platform
+            </Typography>
+          </Box>
           <Grid container spacing={2} direction="column">
             <Grid item xs={12}>
               <StyledPaper>
@@ -274,18 +276,20 @@ const ImpactImportanceDiagram = () => {
 
               {selectedItem && (
                 <StyledPaper sx={{ mt: 2 }}>
-                  <Typography variant="h6">{selectedItem.description}</Typography>
+                  <Typography variant="h6" gutterBottom textAlign="center">
+                    {selectedItem.description}
+                  </Typography>
                 </StyledPaper>
               )}
             </Grid>
             <Grid item xs={12}>
               <StyledPaper>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mb: 0 }}>
                   <Button 
                     variant="contained"
                     color="error"
                     onClick={resetAll}
-                    sx={{ ml: 64}}
+                    sx={{ ml: 16}}
                   >
                     איפוס
                   </Button>
