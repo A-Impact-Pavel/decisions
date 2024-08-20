@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button } from '@mui/material';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
-import { Link } from 'react-router-dom';
+
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -42,11 +42,48 @@ const colors = {
 
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1),
-  marginBottom: theme.spacing(1),
+  padding: theme.spacing(2),
+  height: '100%',
+}));
+
+const FilterPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 const ImpactImportanceDiagram = () => {
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        setContainerSize({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        });
+      }
+    };
+
+    const handleItemClick = (item) => {
+      setSelectedItem(item);
+      setIsDialogOpen(true);
+    };
+
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        resizeObserver.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+  
   const initialFilters = {
     impact: 0,
     importance: 0,
@@ -116,22 +153,17 @@ const ImpactImportanceDiagram = () => {
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={rtlTheme}>
         <CssBaseline />
-        <Container maxWidth="lg">
-          <Box display="flex" justifyContent="center" alignItems="center" width="100%" mx="auto">
-            <Typography 
-              variant="h3" 
-              gutterBottom 
-              color="#F9C307"
-            >
-              Strategic Focus & Insights Platform
-            </Typography>
-          </Box>
-          <Grid container spacing={2} direction="column">
-            <Grid item xs={12}>
+        <Container maxWidth={false} style={{ height: '100vh', padding: '16px' }}>
+          <Typography variant="h3" gutterBottom align="center" color="#F9C307">
+            Strategic Focus & Insights Platform
+          </Typography>
+
+          <Grid container spacing={2} style={{ height: 'calc(100% - 60px)' }}>
+            <Grid item xs={12} md={9} style={{ height: '100%' }}>
               <StyledPaper>
                 <svg 
                   width="100%" 
-                  height="60vh" 
+                  height="100%" 
                   viewBox={getQuadrantViewBox(zoomedQuadrant)}
                   preserveAspectRatio="xMidYMid meet"
                 >
@@ -210,24 +242,20 @@ const ImpactImportanceDiagram = () => {
                   <text x="5" y="25" fontSize="25" fontWeight="bold" fill="#333">0</text>
 
                   <g onClick={() => handleQuadrantClick('Strengths')}>
-                    <rect x="0" y="-450" width="800" height="450" fill="transparent" />
-                    <rect x="820" y="-250" width="200" height="50" fill="transparent" stroke="Blue" strokeWidth="2" />
-                    <text x="920" y="-225" fontSize="30" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">חוזקות-S</text>
+                    <rect x="620" y="-445" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
+                    <text x="710" y="-425" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">חוזקות-S</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Weaknesses')}>
-                    <rect x="-800" y="-450" width="800" height="450" fill="transparent" />
-                    <rect x="-1020" y="-250" width="200" height="50" fill="transparent" stroke="Red" strokeWidth="2" />
-                    <text x="-920" y="-225" fontSize="30" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">חולשות-W</text>
+                    <rect x="-800" y="-445" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
+                    <text x="-710" y="-425" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">חולשות-W</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Opportunities')}>
-                    <rect x="0" y="0" width="800" height="450" fill="transparent" />
-                    <rect x="820" y="200" width="200" height="50" fill="transparent" stroke="Green" strokeWidth="2" />
-                    <text x="920" y="225" fontSize="30" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">הזדמנויות-O</text>
+                    <rect x="620" y="400" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
+                    <text x="710" y="420" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">הזדמנויות-O</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Threats')}>
-                    <rect x="-800" y="0" width="800" height="450" fill="transparent" />
-                    <rect x="-1020" y="200" width="200" height="50" fill="transparent" stroke="#990000" strokeWidth="2" />
-                    <text x="-920" y="225" fontSize="30" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">איומים-T</text>
+                    <rect x="-800" y="400" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
+                    <text x="-710" y="420" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">איומים-T</text>
                   </g>
                   {filteredData.map((item) => {
                     const circleSize = 2 + item.z * 5;
@@ -282,186 +310,172 @@ const ImpactImportanceDiagram = () => {
                 </StyledPaper>
               )}
             </Grid>
-            <Grid item xs={12}>
-              <StyledPaper>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mb: 0 }}>
-                  <Button 
-                    variant="contained"
-                    color="error"
-                    onClick={resetAll}
-                    sx={{ ml: 16}}
-                  >
-                    איפוס
-                  </Button>
-                  <Button 
-                    variant="contained" 
-                    onClick={() => handleSpecialHighlightClick(1)}
-                    sx={{ 
-                      backgroundColor: 'green', 
-                      color: 'white', 
-                      '&:hover': {
-                        backgroundColor: 'darkblue'  // שינוי הצבעים לרחיפה
-                      },
-                      ml: 1 
-                    }}
-                  >
-                    מנועי צמיחה
-                  </Button>
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
-                      backgroundColor: 'red', 
-                      color: 'white', 
-                      '&:hover': {
-                        backgroundColor: 'darkblue'
-                      },
-                      ml: 1 
-                    }}
-                    onClick={() => handleSpecialHighlightClick(2)}
-                  >
-                    מעכבי צמיחה
-                  </Button>
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
-                      backgroundColor: 'mediumpurple', 
-                      color: 'white', 
-                      '&:hover': {
-                        backgroundColor: 'darkblue'  // שינוי הצבע לרחיפה
-                      },
-                      ml: 1 
-                    }}
-                    onClick={() => handleSpecialHighlightClick(3)}
-                  >
-                    סביבה חיצונית
-                  </Button>
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
-                      backgroundColor: 'purple', 
-                      color: 'white', 
-                      '&:hover': {
-                        backgroundColor: 'darkblue'  // שינוי הצבע לרחיפה
-                      },
-                      ml: 1 
-                    }}
-                    onClick={() => handleSpecialHighlightClick(4)}
-                  >
-                    סביבה פנימית
-                  </Button>
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
-                      backgroundColor: 'mediumseagreen', 
-                      color: 'white', 
-                      '&:hover': {
-                        backgroundColor: 'darkblue'  // שינוי הצבע לרחיפה
-                      },
-                      ml: 1 
-                    }}
-                    onClick={handleHighlightClick}
-                  >
-                    אזורי השפעה
-                  </Button>
-                </Box>
-                <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
-                <Grid container spacing={2} justifyContent="flex-end">
-                  <Grid item xs={12} md={4}>
-                    <Typography gutterBottom align="center">השפעה: {filters.impact}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>Max</Typography>
-                      <Slider
-                        value={filters.impact}
-                        onChange={(_, value) => setFilters(prev => ({ ...prev, impact: value }))}
-                        min={0}
-                        max={10}
-                        step={1}
-                        marks
-                        valueLabelDisplay="auto"
-                        sx={{ mx: 2 }}
-                      />
-                      <Typography variant="body2" sx={{ ml: 1 }}>Min</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography gutterBottom align="center">חשיבות: {filters.importance}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>Max</Typography>
-                      <Slider
-                        value={filters.importance}
-                        onChange={(_, value) => setFilters(prev => ({ ...prev, importance: value }))}
-                        min={0}
-                        max={10}
-                        step={1}
-                        marks
-                        valueLabelDisplay="auto"
-                        sx={{ mx: 2 }}
-                      />
-                      <Typography variant="body2" sx={{ ml: 1 }}>Min</Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography gutterBottom align="center">מורכבות: {filters.complexity}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>Max</Typography>
-                      <Slider
-                        value={filters.complexity}
-                        onChange={(_, value) => setFilters(prev => ({ ...prev, complexity: value }))}
-                        min={1}
-                        max={10}
-                        step={1}
-                        marks
-                        valueLabelDisplay="auto"
-                        sx={{ mx: 2 }}
-                      />
-                      <Typography variant="body2" sx={{ ml: 1 }}>Min</Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-                <Box sx={{ mt: 3 }}>
-                  <Grid container spacing={1} justifyContent="flex-end">
-                    {Object.keys(colors).map(dept => (
-                      <Grid item key={dept}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={filters.department.includes(dept)}
-                              onChange={() => {
-                                if (filters.department.includes(dept)) {
-                                  setFilters(prev => ({ ...prev, department: prev.department.filter(d => d !== dept) }));
-                                } else {
-                                  setFilters(prev => ({ ...prev, department: [...prev.department, dept] }));
-                                }
-                              }}
-                              style={{ color: colors[dept] }}
-                            />
-                          }
-                          label={dept}
-                          labelPlacement="start"
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              </StyledPaper>
-            </Grid>
-          </Grid>
-          {/* הוספת קישור מוסתר לעמוד העלאת הקבצים */}
-          <Link 
-            to="/upload" 
-            style={{ 
-              textDecoration: 'none', 
-              fontSize: '5px', 
-              color: 'yellow', 
-              marginLeft: '10px' 
-            }}
-          >
-            העלאת קובץ
-          </Link>
-        </Container>
-      </ThemeProvider>
-    </CacheProvider>
-  );
+<Grid item xs={12} md={3} style={{ height: '100%' }}>
+  <FilterPaper>
+    <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
+    <Grid container spacing={1} sx={{ mb: 2 }}>
+      <Grid item xs={6}>
+        <Button 
+          fullWidth
+          variant="contained" 
+          onClick={() => handleSpecialHighlightClick(1)}
+          sx={{ 
+            backgroundColor: 'green', 
+            color: 'white', 
+            '&:hover': {
+              backgroundColor: 'darkgreen'
+            }
+          }}
+        >
+          מנועי צמיחה
+        </Button>
+      </Grid>
+      <Grid item xs={6}>
+        <Button 
+          fullWidth
+          variant="contained" 
+          onClick={() => handleSpecialHighlightClick(2)}
+          sx={{ 
+            backgroundColor: 'red', 
+            color: 'white', 
+            '&:hover': {
+              backgroundColor: 'darkred'
+            }
+          }}
+        >
+          מעכבי צמיחה
+        </Button>
+      </Grid>
+      <Grid item xs={6}>
+        <Button 
+          fullWidth
+          variant="contained" 
+          onClick={() => handleSpecialHighlightClick(3)}
+          sx={{ 
+            backgroundColor: 'mediumpurple', 
+            color: 'white', 
+            '&:hover': {
+              backgroundColor: 'rebeccapurple'
+            }
+          }}
+        >
+          סביבה חיצונית
+        </Button>
+      </Grid>
+      <Grid item xs={6}>
+        <Button 
+          fullWidth
+          variant="contained" 
+          onClick={() => handleSpecialHighlightClick(4)}
+          sx={{ 
+            backgroundColor: 'purple', 
+            color: 'white', 
+            '&:hover': {
+              backgroundColor: 'indigo'
+            }
+          }}
+        >
+          סביבה פנימית
+        </Button>
+      </Grid>
+      <Grid item xs={6}>
+        <Button 
+          fullWidth
+          variant="contained"
+          color="error"
+          onClick={resetAll}
+        >
+          איפוס
+        </Button>
+      </Grid>
+      <Grid item xs={6}>
+        <Button 
+          fullWidth
+          variant="contained" 
+          onClick={handleHighlightClick}
+          sx={{ 
+            backgroundColor: 'mediumseagreen', 
+            color: 'white', 
+            '&:hover': {
+              backgroundColor: 'seagreen'
+            }
+          }}
+        >
+          אזורי השפעה
+        </Button>
+      </Grid>
+    </Grid>
+    <Typography align="left" gutterBottom >השפעה: {filters.impact}</Typography>
+    <Slider
+      value={filters.impact}
+      onChange={(_, value) => handleFilterChange('impact', value)}
+      min={0}
+      max={10}
+      step={1}
+      marks
+      valueLabelDisplay="auto"
+    />
+    <Typography align="left" gutterBottom>חשיבות: {filters.importance}</Typography>
+    <Slider
+      value={filters.importance}
+      onChange={(_, value) => handleFilterChange('importance', value)}
+      min={0}
+      max={10}
+      step={1}
+      marks
+      valueLabelDisplay="auto"
+    />
+    <Typography align="left" gutterBottom>מורכבות: {filters.complexity}</Typography>
+    <Slider
+      value={filters.complexity}
+      onChange={(_, value) => handleFilterChange('complexity', value)}
+      min={0}
+      max={10}
+      step={1}
+      marks
+      valueLabelDisplay="auto"
+    />
+    <Box sx={{ 
+      display: 'flex', 
+      flexWrap: 'wrap', 
+      justifyContent: 'flex-end',
+      gap: 1  // מרווח בין האלמנטים
+    }}>
+      {Object.keys(colors).map(dept => (
+        <FormControlLabel
+          key={dept}
+          control={
+            <Checkbox
+              checked={filters.department.includes(dept)}
+              onChange={() => {
+                if (filters.department.includes(dept)) {
+                  handleFilterChange('department', filters.department.filter(d => d !== dept));
+                } else {
+                  handleFilterChange('department', [...filters.department, dept]);
+                }
+              }}
+              style={{ color: colors[dept] }}
+            />
+          }
+          label={dept}
+          labelPlacement="start"
+          sx={{
+            margin: 0,
+            '& .MuiFormControlLabel-label': {
+              marginLeft: 1,
+              marginRight: 1,
+            },
+          }}
+        />
+      ))}
+    </Box>
+    </FilterPaper>
+</Grid>
+</Grid>
+</Container>
+</ThemeProvider>
+</CacheProvider>
+);
 };
 
 export default ImpactImportanceDiagram;
