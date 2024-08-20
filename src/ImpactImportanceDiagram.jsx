@@ -5,7 +5,7 @@ import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
-
+import { Link } from 'react-router-dom';
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -65,11 +65,6 @@ const ImpactImportanceDiagram = () => {
           height: containerRef.current.offsetHeight,
         });
       }
-    };
-
-    const handleItemClick = (item) => {
-      setSelectedItem(item);
-      setIsDialogOpen(true);
     };
 
     const resizeObserver = new ResizeObserver(updateSize);
