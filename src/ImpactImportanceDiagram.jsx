@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ThemeProvider, createTheme, styled, keyframes } from '@mui/material/styles';
-import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
 import { Link } from 'react-router-dom';
+import { Numbers } from '@mui/icons-material';
 
 const NoScrollContainer = styled(Container)({
   height: '100vh',
@@ -60,7 +61,7 @@ const EnhancedTitle = () => {
   return (
     <AnimatedTitleContainer>
       <AnimatedTitle variant="h3">
-        Strategic Focus & Insights Platform
+        Decision Making Platform
       </AnimatedTitle>
       <Logo src="https://i.postimg.cc/ncLP4Ghr/Strategy-AI-People-3.png" alt="Logo" />
     </AnimatedTitleContainer>
@@ -113,9 +114,119 @@ const FilterPaper = styled(Paper)(({ theme }) => ({
   flexDirection: 'column',
 }));
 
+const CustomizationDialog = ({ open, onClose, onSave, initialLabels }) => {
+  const [labels, setLabels] = useState(initialLabels);
+
+  const handleChange = (field, value) => {
+    setLabels(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDepartmentChange = (dept, value) => {
+    setLabels(prev => ({
+      ...prev,
+      departments: {
+        ...prev.departments,
+        [dept]: value
+      }
+    }));
+  };
+
+   return (
+      <Dialog open={open} onClose={onClose}>
+        <DialogTitle dir='rtl'>התאמה אישית של תוויות</DialogTitle>
+        <DialogContent dir='rtl'>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="חוזקות"
+            value={labels.strengths}
+            onChange={(e) => handleChange('strengths', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="חולשות"
+            value={labels.weaknesses}
+            onChange={(e) => handleChange('weaknesses', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="הזדמנויות"
+            value={labels.opportunities}
+            onChange={(e) => handleChange('opportunities', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="איומים"
+            value={labels.threats}
+            onChange={(e) => handleChange('threats', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="השפעה"
+            value={labels.impact}
+            onChange={(e) => handleChange('impact', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="חשיבות"
+            value={labels.importance}
+            onChange={(e) => handleChange('importance', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="מורכבות"
+            value={labels.complexity}
+            onChange={(e) => handleChange('complexity', e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="כותרת מחלקות"
+            value={labels.departmentsTitle}
+            onChange={(e) => handleChange('departmentsTitle', e.target.value)}
+          />
+          {Object.keys(initialLabels.departments).map((dept, index) => (
+            <TextField
+              key={index}
+              fullWidth
+              margin="normal"
+              label={`מחלקה ${index + 1}`}
+              value={labels.departments[dept]}
+              onChange={(e) =>  handleDepartmentChange(dept, e.target.value)}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>ביטול</Button>
+          <Button onClick={() => onSave(labels)}>שמור</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+
 const ImpactImportanceDiagram = () => {
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef(null);
+
+  const [customLabels, setCustomLabels] = useState({
+    strengths: 'ימין עליון',
+    weaknesses: 'שמאל עליון',
+    opportunities: 'ימין תחתון',
+    threats: 'שמאל תחתון',
+    impact: 'פרמטר ציר אופקי',
+    importance: 'פרטמר ציר אנכי',
+    complexity: 'פרמטר גודל',
+    departmentsTitle: 'פרמטר צבע',
+    departments: { ...colors },
+  });
+  const [isCustomizationDialogOpen, setIsCustomizationDialogOpen] = useState(false);
 
 
   useEffect(() => {
@@ -127,6 +238,7 @@ const ImpactImportanceDiagram = () => {
         });
       }
     };
+
 
     const resizeObserver = new ResizeObserver(updateSize);
     if (containerRef.current) {
@@ -215,6 +327,20 @@ const ImpactImportanceDiagram = () => {
     setIsDialogOpen(false);
   };
 
+  const handleOpenCustomizationDialog = () => {
+    setIsCustomizationDialogOpen(true);
+  };
+
+  const handleCloseCustomizationDialog = () => {
+    setIsCustomizationDialogOpen(false);
+  };
+
+  const handleSaveCustomLabels = (newLabels) => {
+    setCustomLabels(newLabels);
+    setIsCustomizationDialogOpen(false);
+    // You might want to save these labels to localStorage or your backend here
+  };
+
   return (
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={rtlTheme}>
@@ -223,7 +349,7 @@ const ImpactImportanceDiagram = () => {
         <Container maxWidth={false} style={{ height: '100vh', padding: '16px' }}>
           <EnhancedTitle />
           <Grid container spacing={2} style={{ height: 'calc(100% - 60px)' }}>
-            <Grid item xs={12} md={9} style={{ height: '100%' }}>
+            <Grid item xs={12} md={10} style={{ height: '100%' }}>
               <StyledPaper>
                 <svg 
                   width="100%" 
@@ -298,32 +424,27 @@ const ImpactImportanceDiagram = () => {
                   <polygon points="0,-450 -10,-420 10,-420" fill="black" />
                   <polygon points="0,450 -10,420 10,420" fill="black" />
 
-                  <text x="780" y="30" fontSize="20" fontWeight="bold" textAnchor="end" fill="#333">השפעה גבוהה</text>
-                  <text x="-780" y="30" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">השפעה גבוהה</text>
-                  <text x="20" y="-420" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">חשיבות גבוהה</text>
-                  <text x="20" y="440" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">חשיבות גבוהה</text>
-
+                   <text x="780" y="30" fontSize="20" fontWeight="bold" textAnchor="end" fill="#333">{`${customLabels.impact} גבוהה`}</text>
+                    <text x="-780" y="30" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.impact} גבוהה`}</text>
+                    <text x="20" y="-420" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.importance} גבוהה`}</text>
+                    <text x="20" y="440" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.importance} גבוהה`}</text>
                   <text x="5" y="25" fontSize="25" fontWeight="bold" fill="#333">0</text>
 
                   <g onClick={() => handleQuadrantClick('Strengths')}>
-                    <rect x="0" y="-450" width="800" height="450" fill="transparent" />
                     <rect x="618" y="-448" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
-                    <text x="710" y="-428" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">חוזקות-S</text>
+                    <text x="710" y="-428" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">{customLabels.strengths}</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Weaknesses')}>
-                    <rect x="-800" y="-450" width="800" height="450" fill="transparent" />
                     <rect x="-798" y="-448" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
-                    <text x="-710" y="-428" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">חולשות-W</text>
+                    <text x="-710" y="-428" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">{customLabels.weaknesses}</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Opportunities')}>
-                    <rect x="0" y="0" width="800" height="450" fill="transparent" />
                     <rect x="618" y="408" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
-                    <text x="710" y="428" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">הזדמנויות-O</text>
+                    <text x="710" y="428" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">{customLabels.opportunities}</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Threats')}>
-                    <rect x="-800" y="0" width="800" height="450" fill="transparent" />
                     <rect x="-798" y="408" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
-                    <text x="-710" y="428" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">איומים-T</text>
+                    <text x="-710" y="428" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">{customLabels.threats}</text>
                   </g>
                   {filteredData.map((item) => {
                     const circleSize = 1 + item.z * 3;
@@ -365,7 +486,7 @@ const ImpactImportanceDiagram = () => {
                   </svg>
               </StyledPaper>
             </Grid>
-            <Grid item xs={12} md={3} style={{ height: '100%' }}>
+            <Grid item xs={12} md={2} style={{ height: '100%' }}>
               <FilterPaper>
                 <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
                 <Grid container spacing={1} sx={{ mb: 2 }}>
@@ -460,7 +581,7 @@ const ImpactImportanceDiagram = () => {
                     </Button>
                   </Grid>
                 </Grid>
-                <Typography align="left" gutterBottom>השפעה: {filters.impact}</Typography>
+                <Typography align="left" gutterBottom>{`${customLabels.impact}: ${filters.impact}`}</Typography>
                 <Slider
                   value={filters.impact}
                   onChange={(_, value) => handleFilterChange('impact', value)}
@@ -470,7 +591,7 @@ const ImpactImportanceDiagram = () => {
                   marks
                   valueLabelDisplay="auto"
                 />
-                <Typography align="left" gutterBottom>חשיבות: {filters.importance}</Typography>
+                <Typography align="left" gutterBottom>{`${customLabels.importance}: ${filters.importance}`}</Typography>
                 <Slider
                   value={filters.importance}
                   onChange={(_, value) => handleFilterChange('importance', value)}
@@ -480,7 +601,7 @@ const ImpactImportanceDiagram = () => {
                   marks
                   valueLabelDisplay="auto"
                 />
-                <Typography align="left" gutterBottom>מורכבות: {filters.complexity}</Typography>
+                <Typography align="left" gutterBottom>{`${customLabels.complexity}: ${filters.complexity}`}</Typography>
                 <Slider
                   value={filters.complexity}
                   onChange={(_, value) => handleFilterChange('complexity', value)}
@@ -490,40 +611,51 @@ const ImpactImportanceDiagram = () => {
                   marks
                   valueLabelDisplay="auto"
                 />
+                <Typography variant="h6" gutterBottom align="center">
+                  {customLabels.departmentsTitle}
+                </Typography>
                 <Box sx={{ 
                   display: 'flex', 
                   flexWrap: 'wrap', 
                   justifyContent: 'flex-end',
                   gap: 1
                 }}>
-                  {Object.keys(colors).map(dept => (
-                    <FormControlLabel
-                      key={dept}
-                      control={
-                        <Checkbox
-                          checked={filters.department.includes(dept)}
-                          onChange={() => {
-                            if (filters.department.includes(dept)) {
-                              handleFilterChange('department', filters.department.filter(d => d !== dept));
-                            } else {
-                              handleFilterChange('department', [...filters.department, dept]);
-                            }
-                          }}
-                          style={{ color: colors[dept] }}
-                        />
-                      }
-                      label={dept}
-                      labelPlacement="start"
-                      sx={{
-                        margin: 0,
-                        '& .MuiFormControlLabel-label': {
-                          marginLeft: 1,
-                          marginRight: 1,
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
+                  {Object.keys(customLabels.departments).map(dept => (
+                      <FormControlLabel
+                        key={dept}
+                        control={
+                          <Checkbox
+                            checked={filters.department.includes(dept)}
+                            onChange={() => {
+                              if (filters.department.includes(dept)) {
+                                handleFilterChange('department', filters.department.filter(d => d !== dept));
+                              } else {
+                                handleFilterChange('department', [...filters.department, dept]);
+                              }
+                            }}
+                            style={{ color: colors[dept] }}
+                          />
+                        }
+                        label={customLabels.departments[dept]}
+                        labelPlacement="start"
+                        sx={{
+                          margin: 0,
+                          '& .MuiFormControlLabel-label': {
+                            marginLeft: 1,
+                            marginRight: 1,
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                <Button 
+                  onClick={handleOpenCustomizationDialog} 
+                  variant="contained" 
+                  color="primary" 
+                  style={{ marginTop: '16px', width: '100%' }}
+                >
+                  התאמה אישית של תוויות
+                </Button>
                 <Link 
                   to="/upload" 
                   style={{ 
@@ -570,6 +702,12 @@ const ImpactImportanceDiagram = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        <CustomizationDialog
+          open={isCustomizationDialogOpen}
+          onClose={handleCloseCustomizationDialog}
+          onSave={handleSaveCustomLabels}
+          initialLabels={customLabels}
+        />
       </ThemeProvider>
     </CacheProvider>
   );
