@@ -1,11 +1,71 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
+import { ThemeProvider, createTheme, styled, keyframes } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
 import { Link } from 'react-router-dom';
+
+const NoScrollContainer = styled(Container)({
+  height: '100vh',
+  overflow: 'hidden',
+});
+
+const gradientAnimation = keyframes`
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+`;
+
+const AnimatedTitleContainer = styled(Box)({
+  position: 'relative',
+  width: '100%',
+  marginBottom: '16px',
+});
+
+const AnimatedTitle = styled(Typography)(({ theme }) => ({
+  background: 'linear-gradient(45deg, #FF8E53, black 33%, black 66%, #FF8E53)',
+  backgroundSize: '300% 300%',
+  animation: `${gradientAnimation} 20s ease infinite`,
+  color: 'white',
+  padding: '10px 20px',
+  borderRadius: '8px',
+  boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+  transition: 'transform 0.9s ease-in-out',
+  cursor: 'pointer',
+  width: '100%',
+  textAlign: 'center',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const Logo = styled('img')({
+  position: 'absolute',
+  top: '50%',
+  left: '16px', // Adjust this value to position the logo as needed
+  transform: 'translateY(-50%)',
+  height: '50px', // Adjust the size as needed
+  zIndex: 1,
+});
+
+const EnhancedTitle = () => {
+  return (
+    <AnimatedTitleContainer>
+      <AnimatedTitle variant="h3">
+        Strategic Focus & Insights Platform
+      </AnimatedTitle>
+      <Logo src="https://i.postimg.cc/ncLP4Ghr/Strategy-AI-People-3.png" alt="Logo" />
+    </AnimatedTitleContainer>
+  );
+};
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -56,7 +116,7 @@ const FilterPaper = styled(Paper)(({ theme }) => ({
 const ImpactImportanceDiagram = () => {
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef(null);
-  
+
 
   useEffect(() => {
     const updateSize = () => {
@@ -79,7 +139,7 @@ const ImpactImportanceDiagram = () => {
       }
     };
   }, []);
-  
+
   const initialFilters = {
     impact: 0,
     importance: 0,
@@ -159,11 +219,9 @@ const ImpactImportanceDiagram = () => {
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={rtlTheme}>
         <CssBaseline />
+        <NoScrollContainer maxWidth={false} style={{ padding: '16px' }}>
         <Container maxWidth={false} style={{ height: '100vh', padding: '16px' }}>
-          <Typography variant="h3" gutterBottom align="center" color="0">
-            Strategic Focus & Insights Platform
-          </Typography>
-
+          <EnhancedTitle />
           <Grid container spacing={2} style={{ height: 'calc(100% - 60px)' }}>
             <Grid item xs={12} md={9} style={{ height: '100%' }}>
               <StyledPaper>
@@ -249,67 +307,62 @@ const ImpactImportanceDiagram = () => {
 
                   <g onClick={() => handleQuadrantClick('Strengths')}>
                     <rect x="0" y="-450" width="800" height="450" fill="transparent" />
-                    <rect x="620" y="-448" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
+                    <rect x="618" y="-448" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
                     <text x="710" y="-428" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">חוזקות-S</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Weaknesses')}>
                     <rect x="-800" y="-450" width="800" height="450" fill="transparent" />
-                    <rect x="-800" y="-448" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
+                    <rect x="-798" y="-448" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
                     <text x="-710" y="-428" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">חולשות-W</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Opportunities')}>
                     <rect x="0" y="0" width="800" height="450" fill="transparent" />
-                    <rect x="620" y="408" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
+                    <rect x="618" y="408" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
                     <text x="710" y="428" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">הזדמנויות-O</text>
                   </g>
                   <g onClick={() => handleQuadrantClick('Threats')}>
                     <rect x="-800" y="0" width="800" height="450" fill="transparent" />
-                    <rect x="-800" y="408" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
+                    <rect x="-798" y="408" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
                     <text x="-710" y="428" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">איומים-T</text>
                   </g>
-{filteredData.map((item) => {
-  const circleSize = 1 + item.z * 3;
-  return (
-    <g key={item.id} onClick={() => handleItemClick(item)} style={{ cursor: 'pointer' }}>
-      <circle 
-        cx={(item.x * 80)} 
-        cy={(item.y * -45)} 
-        r={circleSize}
-        fill={colors[item.department]}
-      />
-      <text
-        x={(item.x * 80)}
-        y={(item.y * -45) + circleSize + 15}
-        textAnchor="middle"
-        fill="black"
-        fontSize="12"
-        fontWeight="bold"
-      >
-        {item.id}
-      </text>
-      <text
-        x={(item.x * 80)}
-        y={(item.y * -45) + circleSize + 30}
-        textAnchor="middle"
-        fill="black"
-        fontSize="16"
-      >
-        {item.description}
-      </text>
-    </g>
-  );
-})}
-                </svg>
-                {zoomedQuadrant && (
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    onClick={() => setZoomedQuadrant(null)}
-                    sx={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1 }}
-                  >
-                    חזרה לתצוגה מלאה
-                  </Button>
-                )}
+                  {filteredData.map((item) => {
+                    const circleSize = 1 + item.z * 3;
+                    return (
+                      <g 
+                        key={item.id} 
+                        onClick={() => handleItemClick(item)} 
+                        style={{ cursor: 'pointer' }}
+                        className="circle-group"
+                      >
+                        <circle 
+                          cx={(item.x * 80)} 
+                          cy={(item.y * -45)} 
+                          r={circleSize}
+                          fill={colors[item.department]}
+                        />
+                        <text
+                          x={(item.x * 80)}
+                          y={(item.y * -45) + circleSize + 15}
+                          textAnchor="middle"
+                          fill="black"
+                          fontSize="12"
+                          fontWeight="bold"
+                        >
+                          {item.id}
+                        </text>
+                        <text
+                          x={(item.x * 80)}
+                          y={(item.y * -45) + circleSize + 30}
+                          textAnchor="middle"
+                          fill="black"
+                          fontSize="16"
+                        >
+                          {item.description}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  </svg>
               </StyledPaper>
             </Grid>
             <Grid item xs={12} md={3} style={{ height: '100%' }}>
@@ -471,21 +524,25 @@ const ImpactImportanceDiagram = () => {
                     />
                   ))}
                 </Box>
+                <Link 
+                  to="/upload" 
+                  style={{ 
+                    textDecoration: 'none', 
+                    fontSize: '5px', 
+                    color: 'yellow', 
+                    marginLeft: '10px', 
+                    textAlign: 'right',
+                  }}
+                >
+                  העלאת קובץ
+                </Link>
               </FilterPaper>
             </Grid>
           </Grid>
-          <Link 
-            to="/upload" 
-            style={{ 
-              textDecoration: 'none', 
-              fontSize: '5px', 
-              color: 'yellow', 
-              marginLeft: '10px' 
-            }}
-          >
-            העלאת קובץ
-          </Link>
+
+
         </Container>
+          </NoScrollContainer>
 
         <Dialog 
           open={isDialogOpen} 
@@ -498,7 +555,6 @@ const ImpactImportanceDiagram = () => {
             },
           }}
         >
-          <DialogTitle>תוכן</DialogTitle>
           <DialogContent>
             {selectedItem && (
               <>
