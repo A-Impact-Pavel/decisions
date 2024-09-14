@@ -101,6 +101,17 @@ const FilterPaper = styled(Paper)(({ theme }) => ({
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
+  overflowY: 'auto', // מאפשר גלילה אנכית
+  scrollbarWidth: 'none', // מסתיר את סרגל הגלילה הפנימי בפיירפוקס
+  msOverflowStyle: 'none',  // מסתיר את סרגל הגלילה הפנימי באינטרנט אקספלורר
+  transition: 'all 0.25s ease-in-out', // מעבר חלק
+  '&::-webkit-scrollbar': {
+    display: 'none', // מסתיר את סרגל הגלילה הפנימי בכרום וספארי
+  },
+  [theme.breakpoints.down('sm')]: { // עיצוב מותאם למכשירים קטנים
+    padding: theme.spacing(1),
+  },
+  direction: 'rtl', // כיוון עברי
 }));
 
 const CustomizationDialog = ({ open, onClose, onSave, initialLabels }) => {
@@ -459,6 +470,39 @@ const ImpactImportanceDiagram = () => {
                         >
                           התאמה אישית של תוויות
                         </Button>
+                        {/* New content starts here */}
+                        <Typography variant="h6" style={{ marginTop: '16px', textAlign: 'right' }}>
+                          פרמטרים להחלטה
+                        </Typography>
+                        <Typography component="div" style={{ marginTop: '8px', textAlign: 'right' }}>
+                          <ol style={{
+                            paddingRight: '0',
+                            marginRight: '0',
+                            listStyleType: 'none',
+                            counterReset: 'item'
+                          }}>
+                            {['מנועי צמיחה', 'מעכבי צמיחה', 'עיקרון הפארטו 80/20'].map((text, index) => (
+                              <li key={index} style={{
+                                counterIncrement: 'item',
+                                display: 'flex',
+                                alignItems: 'start',
+                                justifyContent: 'flex-start',
+                                marginBottom: '5px',
+                                direction: 'rtl'
+                              }}>
+                                <span style={{
+                                  minWidth: '25px',
+                                  textAlign: 'right',
+                                  marginRight: '5px'
+                                }}>
+                                  {(index + 1) + '.'}
+                                </span>
+                                <span>{text}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </Typography>
+                        {/* New content ends here */}
                         <Link 
                           to="/upload" 
                           style={{ 
