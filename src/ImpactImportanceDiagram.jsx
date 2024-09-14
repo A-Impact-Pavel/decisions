@@ -25,6 +25,29 @@ const gradientAnimation = keyframes`
   }
 `;
 
+const FixedSizeGraph = styled(Paper)(({ theme }) => ({
+  width: '800px',
+  height: '500px',
+  margin: '0 auto',
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
+    height: 'auto',
+    aspectRatio: '8 / 5',
+  },
+}));
+
+const DynamicFilters = styled(Paper)(({ theme }) => ({
+  height: '100%',
+  overflowY: 'auto',
+  padding: theme.spacing(2),
+}));
+
+const FlexContainer = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+});
+
 const AnimatedTitleContainer = styled(Box)({
   position: 'relative',
   width: '100%',
@@ -216,14 +239,10 @@ const ImpactImportanceDiagram = () => {
   const containerRef = useRef(null);
 
   const [customLabels, setCustomLabels] = useState({
-    strengths: 'ימין עליון',
-    weaknesses: 'שמאל עליון',
-    opportunities: 'ימין תחתון',
-    threats: 'שמאל תחתון',
-    impact: 'פרמטר ציר אופקי',
-    importance: 'פרטמר ציר אנכי',
-    complexity: 'פרמטר גודל',
-    departmentsTitle: 'פרמטר צבע',
+    impact: 'השפעה',
+    importance: 'חשיבות',
+    complexity: 'מורכבות',
+    departmentsTitle: 'מחלקות',
     departments: { ...colors },
   });
   const [isCustomizationDialogOpen, setIsCustomizationDialogOpen] = useState(false);
@@ -296,14 +315,8 @@ const ImpactImportanceDiagram = () => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
   };
 
-  const getQuadrantViewBox = (quadrant) => {
-    switch(quadrant) {
-      case 'Strengths': return '0 -450 800 450';
-      case 'Weaknesses': return '-800 -450 800 450';
-      case 'Opportunities': return '0 0 800 450';
-      case 'Threats': return '-800 0 800 450';
-      default: return '-800 -450 1600 900';
-    }
+  const getQuadrantViewBox = () => {
+    return '-45 -450 810 500';
   };
 
   const handleQuadrantClick = (quadrant) => {
@@ -341,341 +354,230 @@ const ImpactImportanceDiagram = () => {
     // You might want to save these labels to localStorage or your backend here
   };
 
-  return (
-    <CacheProvider value={cacheRtl}>
-      <ThemeProvider theme={rtlTheme}>
-        <CssBaseline />
-        <NoScrollContainer maxWidth={false} style={{ padding: '16px' }}>
-        <Container maxWidth={false} style={{ height: '100vh', padding: '16px' }}>
-          <EnhancedTitle />
-          <Grid container spacing={2} style={{ height: 'calc(100% - 60px)' }}>
-            <Grid item xs={12} md={10} style={{ height: '100%' }}>
-              <StyledPaper>
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox={getQuadrantViewBox(zoomedQuadrant)}
-                  preserveAspectRatio="xMidYMid meet"
-                >
-                  <defs>
-                    <radialGradient id="grid-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                      <stop offset="0%" stopColor="#f0f0f0" stopOpacity="0.8" />
-                      <stop offset="100%" stopColor="#e0e0e0" stopOpacity="0.2" />
-                    </radialGradient>
+        return (
+          <CacheProvider value={cacheRtl}>
+            <ThemeProvider theme={rtlTheme}>
+              <CssBaseline />
+              <NoScrollContainer maxWidth={false} style={{ padding: '16px' }}>
+                <Container maxWidth={false} style={{ height: '100vh', padding: '16px' }}>
+                  <EnhancedTitle />
+                  <Grid container spacing={2} style={{ height: 'calc(100% - 60px)' }}>
+                    <Grid item xs={12} md={9} style={{ height: '100%' }}>
+                      <StyledPaper>
+                        <svg 
+                          width="100%" 
+                          height="100%" 
+                          viewBox={getQuadrantViewBox()}
+                          preserveAspectRatio="xMidYMid meet"
+                        >
+                          <defs>
+                            <radialGradient id="grid-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                              <stop offset="0%" stopColor="#f0f0f0" stopOpacity="0.8" />
+                              <stop offset="100%" stopColor="#e0e0e0" stopOpacity="0.2" />
+                            </radialGradient>
+                            <mask id="extreme-mask">
+                              <rect x="0" y="-450" width="800" height="450" fill="black" />
+                              <rect x="400" y="-450" width="400" height="225" fill="white" />
+                            </mask>
+                            <mask id="center-mask">
+                              <rect x="0" y="-450" width="800" height="450" fill="black" />
+                              <rect x="0" y="-224" width="400" height="225" fill="white" />
+                            </mask>
+                          </defs>
 
-                    <mask id="extreme-mask">
-                      <rect x="-800" y="-450" width="1600" height="900" fill="black" />
-                      <rect x="400" y="-450" width="400" height="225" fill="white" />
-                      <rect x="-800" y="-450" width="400" height="225" fill="white" />
-                      <rect x="400" y="225" width="400" height="225" fill="white" />
-                      <rect x="-800" y="225" width="400" height="225" fill="white" />
-                    </mask>
+                          <rect x="0" y="-450" width="800" height="450" fill="url(#grid-gradient)" />
 
-                    <mask id="center-mask">
-                      <rect x="-800" y="-450" width="1600" height="900" fill="black" />
-                      <rect x="-200" y="-112.5" width="400" height="225" fill="white" />
-                    </mask>
-                  </defs>
+                          {(highlightState === 1 || highlightState === 3) && (
+                            <rect x="0" y="-450" width="800" height="450" fill="rgba(0,255,0,0.2)" mask="url(#extreme-mask)" />
+                          )}
+                          {(highlightState === 2 || highlightState === 3) && (
+                            <rect x="0" y="-450" width="800" height="450" fill="rgba(255,0,0,0.2)" mask="url(#center-mask)" />
+                          )}
 
-                  <rect x="-800" y="-450" width="1600" height="900" fill="url(#grid-gradient)" />
+                          {[2.5, 5, 7.5].map(v => (
+                            <React.Fragment key={v}>
+                              <line x1={v * 80} y1="-450" x2={v * 80} y2="0" stroke="#d0d0d0" strokeWidth="1" />
+                              <line x1="0" y1={v * -45} x2="800" y2={v * -45} stroke="#d0d0d0" strokeWidth="1" />
+                            </React.Fragment>
+                          ))}
 
-                  {(highlightState === 1 || highlightState === 3) && (
-                    <rect x="-800" y="-450" width="1600" height="900" fill="rgba(0,255,0,0.2)" mask="url(#extreme-mask)" />
-                  )}
-                  {(highlightState === 2 || highlightState === 3) && (
-                    <rect x="-800" y="-450" width="1600" height="900" fill="rgba(255,0,0,0.2)" mask="url(#center-mask)" />
-                  )}
-                  {highlightSpecialState === 1 && (
-                    <>
-                      <rect x="0" y="-450" width="800" height="450" fill="rgba(0,255,0,0.2)" />
-                      <rect x="0" y="0" width="800" height="450" fill="rgba(0,255,0,0.2)" />
-                    </>
-                  )}
-                  {highlightSpecialState === 2 && (
-                    <>
-                      <rect x="-800" y="-450" width="800" height="450" fill="rgba(255,0,0,0.2)" />
-                      <rect x="-800" y="0" width="800" height="450" fill="rgba(255,0,0,0.2)" />
-                    </>
-                  )}
-                  {highlightSpecialState === 3 && (
-                    <>
-                      <rect x="-800" y="0" width="1600" height="450" fill="rgba(0,0,255,0.2)" />
-                    </>
-                  )}
-                  {highlightSpecialState === 4 && (
-                    <>
-                      <rect x="-800" y="-450" width="1600" height="450" fill="rgba(0,0,255,0.2)" />
-                    </>
-                  )}
+                          <line x1="0" y1="0" x2="800" y2="0" stroke="black" strokeWidth="4" />
+                          <line x1="0" y1="-450" x2="0" y2="0" stroke="black" strokeWidth="4" />
 
+                          <polygon points="800,0 770,-10 770,10" fill="black" />
+                          <polygon points="0,-450 -10,-420 10,-420" fill="black" />
 
-                  {[-7.5, -5, -2.5, 0, 2.5, 5, 7.5].map(v => (
-                    <React.Fragment key={v}>
-                      <line x1={v * 80} y1="-450" x2={v * 80} y2="450" stroke="#d0d0d0" strokeWidth="1" />
-                      <line x1="-800" y1={v * -45} x2="800" y2={v * -45} stroke="#d0d0d0" strokeWidth="1" />
-                    </React.Fragment>
-                  ))}
+                          <text x="790" y="30" fontSize="15" fontWeight="bold" textAnchor="end" fill="#333">{` מקסימום ${customLabels.impact}`}</text>
+                          <text x="-80" y="-420" fontSize="15" fontWeight="bold" textAnchor="start" fill="#333">{`מקסימום`}</text>
+                          <text x="-80" y="-400" fontSize="15" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.importance}`}</text>
+                          <text x="-80" y="10" fontSize="15" fontWeight="bold" fill="#333">מינימום</text>
 
-                  <line x1="-800" y1="0" x2="800" y2="0" stroke="black" strokeWidth="4" />
-                  <line x1="0" y1="-450" x2="0" y2="450" stroke="black" strokeWidth="4" />
-
-                  <polygon points="800,0 770,-10 770,10" fill="black" />
-                  <polygon points="-800,0 -770,-10 -770,10" fill="black" />
-                  <polygon points="0,-450 -10,-420 10,-420" fill="black" />
-                  <polygon points="0,450 -10,420 10,420" fill="black" />
-
-                   <text x="780" y="30" fontSize="20" fontWeight="bold" textAnchor="end" fill="#333">{`${customLabels.impact} גבוהה`}</text>
-                    <text x="-780" y="30" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.impact} גבוהה`}</text>
-                    <text x="20" y="-420" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.importance} גבוהה`}</text>
-                    <text x="20" y="440" fontSize="20" fontWeight="bold" textAnchor="start" fill="#333">{`${customLabels.importance} גבוהה`}</text>
-                  <text x="5" y="25" fontSize="25" fontWeight="bold" fill="#333">0</text>
-
-                  <g onClick={() => handleQuadrantClick('Strengths')}>
-                    <rect x="618" y="-448" width="180" height="40" fill="transparent" stroke="Blue" strokeWidth="2" />
-                    <text x="710" y="-428" fontSize="20" fontWeight="bold" fill="Blue" textAnchor="middle" dominantBaseline="central">{customLabels.strengths}</text>
-                  </g>
-                  <g onClick={() => handleQuadrantClick('Weaknesses')}>
-                    <rect x="-798" y="-448" width="180" height="40" fill="transparent" stroke="Red" strokeWidth="2" />
-                    <text x="-710" y="-428" fontSize="20" fontWeight="bold" fill="Red" textAnchor="middle" dominantBaseline="central">{customLabels.weaknesses}</text>
-                  </g>
-                  <g onClick={() => handleQuadrantClick('Opportunities')}>
-                    <rect x="618" y="408" width="180" height="40" fill="transparent" stroke="Green" strokeWidth="2" />
-                    <text x="710" y="428" fontSize="20" fontWeight="bold" fill="Green" textAnchor="middle" dominantBaseline="central">{customLabels.opportunities}</text>
-                  </g>
-                  <g onClick={() => handleQuadrantClick('Threats')}>
-                    <rect x="-798" y="408" width="180" height="40" fill="transparent" stroke="#990000" strokeWidth="2" />
-                    <text x="-710" y="428" fontSize="20" fontWeight="bold" fill="#990000" textAnchor="middle" dominantBaseline="central">{customLabels.threats}</text>
-                  </g>
-                  {filteredData.map((item) => {
-                    const circleSize = 1 + item.z * 3;
-                    return (
-                      <g 
-                        key={item.id} 
-                        onClick={() => handleItemClick(item)} 
-                        style={{ cursor: 'pointer' }}
-                        className="circle-group"
-                      >
-                        <circle 
-                          cx={(item.x * 80)} 
-                          cy={(item.y * -45)} 
-                          r={circleSize}
-                          fill={colors[item.department]}
+                          {filteredData.map((item) => {
+                            if (item.x > 0 && item.y > 0) {
+                              const circleSize = 1 + item.z * 3;
+                              return (
+                                <g 
+                                  key={item.id} 
+                                  onClick={() => handleItemClick(item)} 
+                                  style={{ cursor: 'pointer' }}
+                                  className="circle-group"
+                                >
+                                  <circle 
+                                    cx={(item.x * 80)} 
+                                    cy={(item.y * -45)} 
+                                    r={circleSize}
+                                    fill={colors[item.department]}
+                                  />
+                                  <text
+                                    x={(item.x * 80)}
+                                    y={(item.y * -45) + circleSize + 15}
+                                    textAnchor="middle"
+                                    fill="black"
+                                    fontSize="12"
+                                    fontWeight="bold"
+                                  >
+                                    {item.id}
+                                  </text>
+                                  <text
+                                    x={(item.x * 80)}
+                                    y={(item.y * -45) + circleSize + 30}
+                                    textAnchor="middle"
+                                    fill="black"
+                                    fontSize="16"
+                                  >
+                                    {item.description}
+                                  </text>
+                                </g>
+                              );
+                            }
+                            return null;
+                          })}
+                        </svg>
+                      </StyledPaper>
+                    </Grid>
+                    <Grid item xs={12} md={3} style={{ height: '100%' }}>
+                      <FilterPaper>
+                        <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
+                        <Grid container spacing={1} sx={{ mb: 2 }}>
+                          <Grid item xs={6}>
+                            <Button 
+                              fullWidth
+                              variant="contained"
+                              color="error"
+                              onClick={resetAll}
+                            >
+                              איפוס
+                            </Button>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Button 
+                              fullWidth
+                              variant="contained" 
+                              onClick={handleHighlightClick}
+                              sx={{ 
+                                backgroundColor: 'mediumseagreen', 
+                                color: 'white', 
+                                '&:hover': {
+                                  backgroundColor: 'seagreen'
+                                }
+                              }}
+                            >
+                              אזורי השפעה
+                            </Button>
+                          </Grid>
+                        </Grid>
+                        <Typography align="left" gutterBottom>{`${customLabels.impact}: ${filters.impact}`}</Typography>
+                        <Slider
+                          value={filters.impact}
+                          onChange={(_, value) => handleFilterChange('impact', value)}
+                          min={0}
+                          max={10}
+                          step={1}
+                          marks
+                          valueLabelDisplay="auto"
                         />
-                        <text
-                          x={(item.x * 80)}
-                          y={(item.y * -45) + circleSize + 15}
-                          textAnchor="middle"
-                          fill="black"
-                          fontSize="12"
-                          fontWeight="bold"
-                        >
-                          {item.id}
-                        </text>
-                        <text
-                          x={(item.x * 80)}
-                          y={(item.y * -45) + circleSize + 30}
-                          textAnchor="middle"
-                          fill="black"
-                          fontSize="16"
-                        >
-                          {item.description}
-                        </text>
-                      </g>
-                    );
-                  })}
-                  </svg>
-              </StyledPaper>
-            </Grid>
-            <Grid item xs={12} md={2} style={{ height: '100%' }}>
-              <FilterPaper>
-                <Typography variant="h6" gutterBottom align="center">פילטרים</Typography>
-                <Grid container spacing={1} sx={{ mb: 2 }}>
-                  <Grid item xs={6}>
-                    <Button 
-                      fullWidth
-                      variant="contained" 
-                      onClick={() => handleSpecialHighlightClick(2)}
-                      sx={{ 
-                        backgroundColor: 'red', 
-                        color: 'white', 
-                        '&:hover': {
-                          backgroundColor: 'darkred'
-                        }
-                      }}
-                    >
-                      מעכבי צמיחה
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Button 
-                      fullWidth
-                      variant="contained" 
-                      onClick={() => handleSpecialHighlightClick(1)}
-                      sx={{ 
-                        backgroundColor: 'green', 
-                        color: 'white', 
-                        '&:hover': {
-                          backgroundColor: 'darkgreen'
-                        }
-                      }}
-                    >
-                      מנועי צמיחה
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Button 
-                      fullWidth
-                      variant="contained" 
-                      onClick={() => handleSpecialHighlightClick(3)}
-                      sx={{ 
-                        backgroundColor: 'mediumpurple', 
-                        color: 'white', 
-                        '&:hover': {
-                          backgroundColor: 'rebeccapurple'
-                        }
-                      }}
-                    >
-                      סביבה חיצונית
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Button 
-                      fullWidth
-                      variant="contained" 
-                      onClick={() => handleSpecialHighlightClick(4)}
-                      sx={{ 
-                        backgroundColor: 'purple', 
-                        color: 'white', 
-                        '&:hover': {
-                          backgroundColor: 'indigo'
-                        }
-                      }}
-                    >
-                      סביבה פנימית
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Button 
-                      fullWidth
-                      variant="contained"
-                      color="error"
-                      onClick={resetAll}
-                    >
-                      איפוס
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Button 
-                      fullWidth
-                      variant="contained" 
-                      onClick={handleHighlightClick}
-                      sx={{ 
-                        backgroundColor: 'mediumseagreen', 
-                        color: 'white', 
-                        '&:hover': {
-                          backgroundColor: 'seagreen'
-                        }
-                      }}
-                    >
-                      אזורי השפעה
-                    </Button>
-                  </Grid>
-                </Grid>
-                <Typography align="left" gutterBottom>{`${customLabels.impact}: ${filters.impact}`}</Typography>
-                <Slider
-                  value={filters.impact}
-                  onChange={(_, value) => handleFilterChange('impact', value)}
-                  min={0}
-                  max={10}
-                  step={1}
-                  marks
-                  valueLabelDisplay="auto"
-                />
-                <Typography align="left" gutterBottom>{`${customLabels.importance}: ${filters.importance}`}</Typography>
-                <Slider
-                  value={filters.importance}
-                  onChange={(_, value) => handleFilterChange('importance', value)}
-                  min={0}
-                  max={10}
-                  step={1}
-                  marks
-                  valueLabelDisplay="auto"
-                />
-                <Typography align="left" gutterBottom>{`${customLabels.complexity}: ${filters.complexity}`}</Typography>
-                <Slider
-                  value={filters.complexity}
-                  onChange={(_, value) => handleFilterChange('complexity', value)}
-                  min={0}
-                  max={10}
-                  step={1}
-                  marks
-                  valueLabelDisplay="auto"
-                />
-                <Typography variant="h6" gutterBottom align="center">
-                  {customLabels.departmentsTitle}
-                </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  justifyContent: 'flex-end',
-                  gap: 1
-                }}>
-                  {Object.keys(customLabels.departments).map(dept => (
-                      <FormControlLabel
-                        key={dept}
-                        control={
-                          <Checkbox
-                            checked={filters.department.includes(dept)}
-                            onChange={() => {
-                              if (filters.department.includes(dept)) {
-                                handleFilterChange('department', filters.department.filter(d => d !== dept));
-                              } else {
-                                handleFilterChange('department', [...filters.department, dept]);
+                        <Typography align="left" gutterBottom>{`${customLabels.importance}: ${filters.importance}`}</Typography>
+                        <Slider
+                          value={filters.importance}
+                          onChange={(_, value) => handleFilterChange('importance', value)}
+                          min={0}
+                          max={10}
+                          step={1}
+                          marks
+                          valueLabelDisplay="auto"
+                        />
+                        <Typography align="left" gutterBottom>{`${customLabels.complexity}: ${filters.complexity}`}</Typography>
+                        <Slider
+                          value={filters.complexity}
+                          onChange={(_, value) => handleFilterChange('complexity', value)}
+                          min={0}
+                          max={10}
+                          step={1}
+                          marks
+                          valueLabelDisplay="auto"
+                        />
+                        <Typography variant="h6" gutterBottom align="center">
+                          {customLabels.departmentsTitle}
+                        </Typography>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexWrap: 'wrap', 
+                          justifyContent: 'flex-end',
+                          gap: 1
+                        }}>
+                          {Object.keys(customLabels.departments).map(dept => (
+                            <FormControlLabel
+                              key={dept}
+                              control={
+                                <Checkbox
+                                  checked={filters.department.includes(dept)}
+                                  onChange={() => {
+                                    if (filters.department.includes(dept)) {
+                                      handleFilterChange('department', filters.department.filter(d => d !== dept));
+                                    } else {
+                                      handleFilterChange('department', [...filters.department, dept]);
+                                    }
+                                  }}
+                                  style={{ color: colors[dept] }}
+                                />
                               }
-                            }}
-                            style={{ color: colors[dept] }}
-                          />
-                        }
-                        label={customLabels.departments[dept]}
-                        labelPlacement="start"
-                        sx={{
-                          margin: 0,
-                          '& .MuiFormControlLabel-label': {
-                            marginLeft: 1,
-                            marginRight: 1,
-                          },
-                        }}
-                      />
-                    ))}
-                  </Box>
-                <Button 
-                  onClick={handleOpenCustomizationDialog} 
-                  variant="contained" 
-                  color="primary" 
-                  style={{ marginTop: '16px', width: '100%' }}
-                >
-                  התאמה אישית של תוויות
-                </Button>
-                <Link 
-                  to="/upload" 
-                  style={{ 
-                    textDecoration: 'none', 
-                    fontSize: '5px', 
-                    color: 'yellow', 
-                    marginLeft: '10px', 
-                    textAlign: 'right',
-                  }}
-                >
-                  העלאת קובץ
-                </Link>
-              </FilterPaper>
-            </Grid>
-          </Grid>
-
-
-        </Container>
-          </NoScrollContainer>
-
+                              label={customLabels.departments[dept]}
+                              labelPlacement="start"
+                              sx={{
+                                margin: 0,
+                                '& .MuiFormControlLabel-label': {
+                                  marginLeft: 1,
+                                  marginRight: 1,
+                                },
+                              }}
+                            />
+                          ))}
+                        </Box>
+                        <Button 
+                          onClick={handleOpenCustomizationDialog} 
+                          variant="contained" 
+                          color="primary" 
+                          style={{ marginTop: '16px', width: '100%' }}
+                        >
+                          התאמה אישית של תוויות
+                        </Button>
+                        <Link 
+                          to="/upload" 
+                          style={{ 
+                            textDecoration: 'none', 
+                            fontSize: '5px', 
+                            color: 'yellow', 
+                            marginLeft: '10px', 
+                            textAlign: 'right',
+                          }}
+                        >
+                          העלאת קובץ
+                        </Link>
+                      </FilterPaper>
+                    </Grid>
+                  </Grid>
+                </Container>
+              </NoScrollContainer>
         <Dialog 
           open={isDialogOpen} 
           onClose={handleCloseDialog} 
