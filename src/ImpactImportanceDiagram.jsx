@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ThemeProvider, createTheme, styled, keyframes } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Slider, Checkbox, FormControlLabel, Paper, Grid, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import { CacheProvider } from '@emotion/react';
@@ -6,7 +6,6 @@ import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
 import { Link } from 'react-router-dom';
-import { Numbers } from '@mui/icons-material';
 
 const NoScrollContainer = styled(Container)({
   height: '100vh',
@@ -14,39 +13,10 @@ const NoScrollContainer = styled(Container)({
 });
 
 const gradientAnimation = keyframes`
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 `;
-
-const FixedSizeGraph = styled(Paper)(({ theme }) => ({
-  width: '800px',
-  height: '500px',
-  margin: '0 auto',
-  [theme.breakpoints.down('md')]: {
-    width: '100%',
-    height: 'auto',
-    aspectRatio: '8 / 5',
-  },
-}));
-
-const DynamicFilters = styled(Paper)(({ theme }) => ({
-  height: '100%',
-  overflowY: 'auto',
-  padding: theme.spacing(2),
-}));
-
-const FlexContainer = styled(Box)({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-});
 
 const AnimatedTitleContainer = styled(Box)({
   position: 'relative',
@@ -74,24 +44,21 @@ const AnimatedTitle = styled(Typography)(({ theme }) => ({
 const Logo = styled('img')({
   position: 'absolute',
   top: '50%',
-  left: '16px', // Adjust this value to position the logo as needed
+  left: '16px',
   transform: 'translateY(-50%)',
-  height: '50px', // Adjust the size as needed
+  height: '50px',
   zIndex: 1,
 });
 
-const EnhancedTitle = () => {
-  return (
-    <AnimatedTitleContainer>
-      <AnimatedTitle variant="h3">
-        Decision Making Platform
-      </AnimatedTitle>
-      <Logo src="https://i.postimg.cc/ncLP4Ghr/Strategy-AI-People-3.png" alt="Logo" />
-    </AnimatedTitleContainer>
-  );
-};
+const EnhancedTitle = () => (
+  <AnimatedTitleContainer>
+    <AnimatedTitle variant="h3">
+      Decision Making Platform
+    </AnimatedTitle>
+    <Logo src="https://i.postimg.cc/ncLP4Ghr/Strategy-AI-People-3.png" alt="Logo" />
+  </AnimatedTitleContainer>
+);
 
-// Create rtl cache
 const cacheRtl = createCache({
   key: 'muirtl',
   stylisPlugins: [prefixer, rtlPlugin],
@@ -124,7 +91,6 @@ const colors = {
   'תפעול': '#a51d2d',
 };
 
-
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   height: '100%',
@@ -155,37 +121,9 @@ const CustomizationDialog = ({ open, onClose, onSave, initialLabels }) => {
   };
 
    return (
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle dir='rtl'>התאמה אישית של תוויות</DialogTitle>
-        <DialogContent dir='rtl'>
-          <TextField
-            fullWidth
-            margin="normal"
-            label="חוזקות"
-            value={labels.strengths}
-            onChange={(e) => handleChange('strengths', e.target.value)}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="חולשות"
-            value={labels.weaknesses}
-            onChange={(e) => handleChange('weaknesses', e.target.value)}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="הזדמנויות"
-            value={labels.opportunities}
-            onChange={(e) => handleChange('opportunities', e.target.value)}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="איומים"
-            value={labels.threats}
-            onChange={(e) => handleChange('threats', e.target.value)}
-          />
+     <Dialog open={open} onClose={onClose}>
+       <DialogTitle dir='rtl'>התאמה אישית של תוויות</DialogTitle>
+       <DialogContent dir='rtl'>
           <TextField
             fullWidth
             margin="normal"
@@ -233,11 +171,7 @@ const CustomizationDialog = ({ open, onClose, onSave, initialLabels }) => {
     );
   };
 
-
 const ImpactImportanceDiagram = () => {
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const containerRef = useRef(null);
-
   const [customLabels, setCustomLabels] = useState({
     impact: 'השפעה',
     importance: 'חשיבות',
@@ -246,61 +180,23 @@ const ImpactImportanceDiagram = () => {
     departments: { ...colors },
   });
   const [isCustomizationDialogOpen, setIsCustomizationDialogOpen] = useState(false);
-
-
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        setContainerSize({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight,
-        });
-      }
-    };
-
-
-    const resizeObserver = new ResizeObserver(updateSize);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
-      }
-    };
-  }, []);
-
-  const initialFilters = {
+  const [data, setData] = useState(initialData);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [filters, setFilters] = useState({
     impact: 0,
     importance: 0,
     complexity: 0,
     department: Object.keys(colors),
-  };
+  });
+  const [highlightState, setHighlightState] = useState(0);
 
-  const [data, setData] = useState(initialData);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [zoomedQuadrant, setZoomedQuadrant] = useState(null);
-  const [filters, setFilters] = useState(initialFilters);
-  const [highlightState, setHighlightState] = useState(0); // 0: none, 1: extreme, 2: center, 3: both
-  const [highlightSpecialState, setHighlightSpecialState] = useState(0); // 0: none, 1: right-green, 2: left-red, 3: top-right-bottom-left-blue, 4: bottom-right-top-left-blue
-
-  // Load data from localStorage on component mount
   useEffect(() => {
     const savedData = localStorage.getItem('data');
     if (savedData) {
       setData(JSON.parse(savedData));
     }
   }, []);
-
-  const resetAll = () => {
-    setFilters(initialFilters);
-    setHighlightState(0);
-    setHighlightSpecialState(0);
-    setSelectedItem(null);
-    setZoomedQuadrant(null);
-  };
 
   const filteredData = useMemo(() => {
     return data.filter(item => 
@@ -319,16 +215,8 @@ const ImpactImportanceDiagram = () => {
     return '-45 -450 810 500';
   };
 
-  const handleQuadrantClick = (quadrant) => {
-    setZoomedQuadrant(quadrant === zoomedQuadrant ? null : quadrant);
-  };
-
   const handleHighlightClick = () => {
     setHighlightState((prevState) => (prevState + 1) % 4);
-  };
-
-  const handleSpecialHighlightClick = (state) => {
-    setHighlightSpecialState((prevState) => (prevState === state ? 0 : state));
   };
 
   const handleItemClick = (item) => {
@@ -351,7 +239,17 @@ const ImpactImportanceDiagram = () => {
   const handleSaveCustomLabels = (newLabels) => {
     setCustomLabels(newLabels);
     setIsCustomizationDialogOpen(false);
-    // You might want to save these labels to localStorage or your backend here
+  };
+
+  const resetAll = () => {
+    setFilters({
+      impact: 0,
+      importance: 0,
+      complexity: 0,
+      department: Object.keys(colors),
+    });
+    setHighlightState(0);
+    setSelectedItem(null);
   };
 
         return (
